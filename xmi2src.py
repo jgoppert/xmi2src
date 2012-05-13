@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
+import optparse
 import xmiparser
 import jinja2
 import os
-import optparse
 
 class XMI2Src():
-
     def __init__(self,fileName,language):
+        """
+        A contructor that takes fileName (the filename of the xmi to convert). And
+        the language to convert to. Languages are specified using jinja2 templates and
+        can be found in the lang folder.
+        """
         languageTemplatePath = os.path.join('lang',language)
         self.env = jinja2.Environment(loader=jinja2.PackageLoader('xmi2src',languageTemplatePath),trim_blocks=True)
         model = xmiparser.parse(fileName)
@@ -16,12 +20,22 @@ class XMI2Src():
             print source
 
     class VisStruct():
+        """
+        A structure to hold, public, private, and protected attributes/functions etc.
+        This allows sorting of the methods during creation with the help of the
+        addBasedOnVisibility function.
+        """
+
         def __init__(self):
             self.public = ''
             self.private = ''
             self.protected = ''
 
     def addBasedOnVisibility(self,var,varDef,allVars):
+        """
+        Based on the visibility of var, the variable definition varDef is added
+        to the corresponding visibility of the allVars variable.
+        """
         if var.getVisibility() == 'public':
             allVars.public +=  varDef
         elif var.getVisibility() == 'private':
@@ -33,6 +47,11 @@ class XMI2Src():
         return allVars
 
     def generateMethod(self,xmiMethod):
+        """
+        Generates a src method, given an XMIMethod. A dictionary is 
+        created and this dictionary is used by the method template.
+        """
+        # generate method dictionary
         #for param in xmiMethod.getParams():
             #print 'param', param.getName()
         name = xmiMethod.getName()
@@ -49,6 +68,11 @@ class XMI2Src():
         return methodTemplate.render(methodTemplateDict)
 
     def generateAttribute(self,xmiAttribute):
+        """
+        Generates a src attribute, given an XMIAttribute. A dictionary is 
+        created and this dictionary is used by the method template.
+        """
+        # generate attribute dictionary
         name = xmiAttribute.getName()
         doc = xmiAttribute.getDocumentation()
         type = xmiAttribute.getType()
@@ -63,6 +87,11 @@ class XMI2Src():
         return attributeTemplate.render(attributeTemplateDict)
 
     def generateAssociation(self,xmiAssociation):
+        """
+        Generates a src association, given an XMIAssociation. A dictionary is 
+        created and this dictionary is used by the method template.
+        """
+        # generate association dictionary
         name = xmiAssociation.getName()
         doc = xmiAssociation.getDocumentation()
         type = xmiAssociation.getType()
@@ -77,27 +106,32 @@ class XMI2Src():
         return associationTemplate.render(associationTemplateDict)
 
     def generateClass(self,xmiClass):
+        """
+        Generates a src class, given an XMIClass. A dictionary is 
+        created and this dictionary is used by the method template.
+        """
+        # generate class dictionary
         name = xmiClass.getName()
         doc = xmiClass.getDocumentation()
 
-        # attributes
+        #   attributes
         attributes = self.VisStruct();
         for attribute in xmiClass.getAttributeDefs():
             self.addBasedOnVisibility(attribute,
                 self.generateAttribute(attribute),attributes)
 
-        # methods
+        #   methods
         methods = self.VisStruct();
         for method in xmiClass.getMethodDefs():
             self.addBasedOnVisibility(method,self.generateMethod(method),methods)
 
-        # associations
+        #   associations
         associations = self.VisStruct();
         for association in xmiClass.getFromAssociations():
             self.addBasedOnVisibility(association,
                 self.generateAssociation(association),associations)
 
-        # class template dictionary 
+        #   class template dictionary 
         classTemplateDict = dict(
             name = name,
             doc = doc,
@@ -119,6 +153,7 @@ class XMI2Src():
         classTemplate = self.env.get_template('class.jinja2')
         return classTemplate.render(classTemplateDict)
 
+# command line parsing
 if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option('-f','--file',dest='fileName',help='XMI file',metavar='XMI_FILE')
@@ -136,4 +171,3 @@ if __name__ == '__main__':
         parser.error('unsuppored language, add templates to lang folder to add support')
 
     XMI2Src(fileName,language)
-
