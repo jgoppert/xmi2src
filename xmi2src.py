@@ -15,44 +15,87 @@ class XMI2Src():
             source = self.generateClass(xmiClass)
             print source
 
+    class VisStruct():
+        def __init__(self):
+            self.public = ''
+            self.private = ''
+            self.protected = ''
+
+    def addBasedOnVisibility(self,var,varDef,allVars):
+        if var.getVisibility() == 'public':
+            allVars.public +=  varDef
+        elif var.getVisibility() == 'private':
+            allVars.private +=  varDef
+        elif var.getVisibility() == 'private':
+            allVars.protected +=  varDef
+        else:
+            IOError('unknown visibility', var.getVisibility(), 'for',var.getName())
+        return allVars
+
+    def generateMethod(self,xmiMethod):
+        #for param in xmiMethod.getParams():
+            #print 'param', param.getName()
+        name = xmiMethod.getName()
+        doc = xmiMethod.getDocumentation()
+        type = xmiMethod.getType()
+        methodTemplateDict = dict(
+            name = name,
+            doc = doc,
+            type = type
+        )
+
+        # render method
+        methodTemplate= self.env.get_template('method.jinja2')
+        return methodTemplate.render(methodTemplateDict)
+
+    def generateAttribute(self,xmiAttribute):
+        name = xmiAttribute.getName()
+        doc = xmiAttribute.getDocumentation()
+        type = xmiAttribute.getType()
+        attributeTemplateDict = dict(
+            name = name,
+            doc = doc,
+            type = type
+        )
+
+        # render method
+        attributeTemplate= self.env.get_template('attribute.jinja2')
+        return attributeTemplate.render(attributeTemplateDict)
+
+    def generateAssociation(self,xmiAssociation):
+        name = xmiAssociation.getName()
+        doc = xmiAssociation.getDocumentation()
+        type = xmiAssociation.getType()
+        associationTemplateDict = dict(
+            name = name,
+            doc = doc,
+            type = type
+        )
+
+        # render method
+        associationTemplate= self.env.get_template('association.jinja2')
+        return associationTemplate.render(associationTemplateDict)
+
     def generateClass(self,xmiClass):
         name = xmiClass.getName()
         doc = xmiClass.getDocumentation()
 
-        class VisStruct():
-            def __init__(self):
-                self.public = ''
-                self.private = ''
-                self.protected = ''
-
-        def addBasedOnVisibility(var,varDef,allVars):
-            if var.getVisibility() == 'public':
-                allVars.public +=  varDef
-            elif var.getVisibility() == 'private':
-                allVars.private +=  varDef
-            elif var.getVisibility() == 'private':
-                allVars.protected +=  varDef
-            else:
-                IOError('unknown visibility', var.getVisibility(), 'for',var.getName())
-            return allVars
-        
         # attributes
-        attributes = VisStruct();
+        attributes = self.VisStruct();
         for attribute in xmiClass.getAttributeDefs():
-            attributeDef = '    ' + attribute.getType() + ' ' + attribute.getName() + ';\n'
-            addBasedOnVisibility(attribute,attributeDef,attributes)
+            self.addBasedOnVisibility(attribute,
+                self.generateAttribute(attribute),attributes)
 
         # methods
-        methods = VisStruct();
+        methods = self.VisStruct();
         for method in xmiClass.getMethodDefs():
-            print 'method', method.getName()
-            for param in method.getParams():
-                print 'param', param.getName()
-            methodsDef = '    ' + method.getType() + ' ' + method.getName() + ';\n'
-            addBasedOnVisibility(method,methodDef,methods)
+            self.addBasedOnVisibility(method,self.generateMethod(method),methods)
 
         # associations
-        associations = VisStruct();
+        associations = self.VisStruct();
+        for association in xmiClass.getFromAssociations():
+            self.addBasedOnVisibility(association,
+                self.generateAssociation(association),associations)
 
         # class template dictionary 
         classTemplateDict = dict(
