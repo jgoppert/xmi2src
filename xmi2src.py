@@ -5,7 +5,16 @@ import xmiparser
 import jinja2
 import os
 
-class XMI2Src():
+class XMI2Src(object):
+    """
+    This is the main xmi2src processing class. It converts XMI format
+    files that are produced by UML etc. into source files in various 
+    languages. Jinja2 templates are used to aid in the source code
+    generation. An attempt should be made in development to keep all
+    language specific processing in the template files. This will 
+    simplify addition of new langagues through the addition of a 
+    new Jinja2 template folder, typically found in the lang folder.
+    """
     def __init__(self,fileName,language):
         """
         A contructor that takes fileName (the filename of the xmi to convert). And
