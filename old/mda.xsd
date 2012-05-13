@@ -1,0 +1,99 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:simpleType name="accessType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="public"/>
+    <xs:enumeration value="private"/>
+    <xs:enumeration value="protected"/>
+  </xs:restriction>
+</xs:simpleType> 
+
+<xs:simpleType name="associationType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="association"/>
+    <xs:enumeration value="aggregation"/>
+    <xs:enumeration value="composition"/>
+  </xs:restriction>
+</xs:simpleType> 
+
+<xs:simpleType name="directionType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="a2b"/>
+    <xs:enumeration value="b2a"/>
+    <xs:enumeration value="both"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="attributeType">
+  <xs:sequence>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="doc"  type="xs:string"/>
+    <xs:element name="type" type="xs:string"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="parameterType">
+  <xs:sequence>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="doc"  type="xs:string"/>
+    <xs:element name="type" type="xs:string"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="methodType">
+  <xs:sequence>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="doc"  type="xs:string"/>
+    <xs:element name="type" type="xs:string"/>
+    <xs:element name="access" type="accessType"/>
+    <xs:element name="parameter" type="parameterType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="linkNodeType">
+  <xs:sequence>
+    <xs:element name="class" type="xs:string"/>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="access"  type="accessType"/>
+    <xs:element name="multiplicity" type="xs:int"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="linkType">
+  <xs:sequence>
+    <xs:element name="doc"  type="xs:string"/>
+    <xs:element name="association" type="associationType"/>
+    <xs:element name="direction" type="directionType"/>
+    <xs:element name="nodeA" type="linkNodeType"/>
+    <xs:element name="nodeB" type="linkNodeType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="parentType">
+  <xs:sequence>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="access"  type="accessType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="classType">
+  <xs:sequence>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="doc"  type="xs:string"/>
+    <xs:element name="parent" type="parentType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="method" type="methodType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="attribute" type="attributeType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="structureType">
+  <xs:sequence>
+    <xs:element name="class" type="classType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="link" type="linkType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:element name="structure" type="structureType"/>
+
+</xs:schema>
+<!-- vi:ts=2:sw=2:expandtab: -->
