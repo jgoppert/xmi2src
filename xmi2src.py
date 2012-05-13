@@ -132,8 +132,8 @@ if __name__ == '__main__':
     elif language == None:
         parser.error('must specify language, -l LANGUAGE')
 
-    if language != 'cpp':
-        parser.error('unsuppored language, only cpp currently supported')
+    if not os.path.exists(os.path.join('lang',language)):
+        parser.error('unsuppored language, add templates to lang folder to add support')
 
     XMI2Src(fileName,language)
 
