@@ -8,7 +8,7 @@ import optparse
 class XMI2Src():
 
     def __init__(self,fileName,language):
-        languageTemplatePath = os.path.join('templates',language)
+        languageTemplatePath = os.path.join('lang',language)
         self.env = jinja2.Environment(loader=jinja2.PackageLoader('xmi2src',languageTemplatePath),trim_blocks=True)
         model = xmiparser.parse(fileName)
         for xmiClass in model.getClasses():
